@@ -1,12 +1,20 @@
+import 'dart:async';
+
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 void main() {
+  final eventController = StreamController.broadcast();
+
   var handler = webSocketHandler((WebSocketChannel webSocket) {
+    eventController.stream.listen((event) {
+      webSocket.sink.add(event);
+    });
+
     webSocket.stream.listen((message) {
       print(message);
-      webSocket.sink.add("echo $message");
+      eventController.add(message);
     });
   });
 
